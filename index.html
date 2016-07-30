@@ -3,32 +3,129 @@
 <head>
   <title>Nearby Pokemon</title>
   <link rel="shortcut icon" type="image/png" href="favicon.png"/>
-  <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
-  <link href="style.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet"> 
+  <style>
+  	body {
+  	font-family: 'Lato', sans-serif;
+	font-size: 48px;
+	color: #445956;
+	padding: 20px;
+	}
+	
+	#grid {
+		height: 100%;
+		padding: 50px;
+	}
+	.cell {
+		width: 33.333%;
+		height: 33.333%;
+		float: left;
+	}
+	#footer {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		padding: 1rem;
+		background-color: #efefef;
+		font-size: 36px;
+	}
+	a {
+		text-decoration: none;
+		color: #445956;
+	}
+	p {
+		font-size:10px;
+	}
+  </style>
 </head>
 <body>
 	<center><a href=".">NEARBY</a></center>
 	<hr>
 	<center><img id="loading" src="images/poke.gif" style="visibility:hidden;"/></center>
 	<div id="grid">
-		<div class="cell"><center><img id="i0"/><br><img id="f0"/></center></div>
-		<div class="cell"><center><img id="i1"/><br><img id="f1"/></center></div>
-		<div class="cell"><center><img id="i2"/><br><img id="f2"/></center></div>
-		<div class="cell"><center><img id="i3"/><br><img id="f3"/></center></div>
-		<div class="cell"><center><img id="i4"/><br><img id="f4"/></center></div>
-		<div class="cell"><center><img id="i5"/><br><img id="f5"/></center></div>
-		<div class="cell"><center><img id="i6"/><br><img id="f6"/></center></div>
-		<div class="cell"><center><img id="i7"/><br><img id="f7"/></center></div>
-		<div class="cell"><center><img id="i8"/><br><img id="f8"/></center></div>
+		<div id="c0" class="cell"><center><img id="i0"/><br><img id="f0"/><p id="p0"></p></center></div>
+		<div id="c1" class="cell"><center><img id="i1"/><br><img id="f1"/><p id="p1"></p></center></div>
+		<div id="c2" class="cell"><center><img id="i2"/><br><img id="f2"/><p id="p2"></p></center></div>
+		<div id="c3" class="cell"><center><img id="i3"/><br><img id="f3"/><p id="p3"></p></center></div>
+		<div id="c4" class="cell"><center><img id="i4"/><br><img id="f4"/><p id="p4"></p></center></div>
+		<div id="c5" class="cell"><center><img id="i5"/><br><img id="f5"/><p id="p5"></p></center></div>
+		<div id="c6" class="cell"><center><img id="i6"/><br><img id="f6"/><p id="p6"></p></center></div>
+		<div id="c7" class="cell"><center><img id="i7"/><br><img id="f7"/><p id="p7"></p></center></div>
+		<div id="c8" class="cell"><center><img id="i8"/><br><img id="f8"/><p id="p8"></p></center></div>
 	</div>
 	<div id="footer">
-		<div id="status" align="left" style="float: left;">Getting Location</div><div align="right"><a href="https://pokevision.com">Powered by <img src="images/pokevision.png" style="width:30px; height: 30px;"/> POKE<span style="color:#bd3736;">VISION</span></a></span>
+		<div id="status" align="left" style="float: left;">Getting Location</div><div align="right"><a href="https://pokevision.com">Powered by <img src="images/pokevision.png" style="width:30px; height: 30px;"/> POKEVISION</a></p>
 	</div>
 </body>
 <script src="browserifiedpokego-scan.js"></script>
-<script src="functions.js"></script>
 <script>
-var reload;
-scan(reload);
+var timeout;
+
+function scan(){
+	clearTimeout(timeout);
+	document.getElementById("status").innerHTML = "Getting Location";
+
+	navigator.geolocation.getCurrentPosition( function(position) {
+		
+		document.getElementById("loading").style.visibility = "visible";
+		document.getElementById("status").innerHTML = "Scanning for Pokemon";
+		
+		var coords = {
+			latitude: position.coords.latitude,
+			longitude: position.coords.longitude
+		};
+		
+		pokegoScan(coords, {distance: 500}, function(err, pokemon) {
+			if (err) 
+			{
+				document.getElementById("status").innerHTML = err;
+				
+				document.getElementById("loading").style.visibility = "hidden";
+				timeout = setTimeout("scan();", 2000);	
+			}
+			else
+			{
+				document.getElementById("grid").innerHTML = "<div id=\"c0\" class=\"cell\"><center><img id=\"i0\"/><br><img id=\"f0\"/><p id=\"p0\"></p></center></div><div id=\"c1\" class=\"cell\"><center><img id=\"i1\"/><br><img id=\"f1\"/><p id=\"p1\"></p></center></div><div id=\"c2\" class=\"cell\"><center><img id=\"i2\"/><br><img id=\"f2\"/><p id=\"p2\"></p></center></div><div id=\"c3\" class=\"cell\"><center><img id=\"i3\"/><br><img id=\"f3\"/><p id=\"p3\"></p></center></div><div id=\"c4\" class=\"cell\"><center><img id=\"i4\"/><br><img id=\"f4\"/><p id=\"p4\"></p></center></div><div id=\"c5\" class=\"cell\"><center><img id=\"i5\"/><br><img id=\"f5\"/><p id=\"p5\"></p></center></div><div id=\"c6\" class=\"cell\"><center><img id=\"i6\"/><br><img id=\"f6\"/><p id=\"p6\"></p></center></div><div id=\"c7\" class=\"cell\"><center><img id=\"i7\"/><br><img id=\"f7\"/><p id=\"p7\"></p></center></div><div id=\"c8\" class=\"cell\"><center><img id=\"i8\"/><br><img id=\"f8\"/><p id=\"p8\"></p></center></div>";
+				document.getElementById("status").innerHTML = "Loading Results";
+				
+				var nearbyPokemon = 0;
+			
+				for (var current = 0; current<pokemon.length; current++)
+				{
+					console.log(current + ": " + pokemon[current].name + pokemon[current].expiration_time  + " is " + pokemon[current].distance + "m away.");
+					var seconds = new Date() / 1000;
+					
+					if (nearbyPokemon < 9)
+					{
+						if (current == 0 || pokemon[current].distance != pokemon[current-1].distance || pokemon[current].name != pokemon[current-1].name)
+						{
+							if (pokemon[current].pokemonId < 10) num = "00" + pokemon[current].pokemonId;
+							else if (pokemon[current].pokemonId < 100) num = "0" + pokemon[current].pokemonId;
+							else num = pokemon[current].pokemonId;
+							document.getElementById("i" + nearbyPokemon).src = "images/" + num + ".png";
+
+							if (pokemon[current].distance < 40) {}
+							else if (pokemon[current].distance <= 60) document.getElementById("f" + nearbyPokemon).src = "images/1foot.png";
+							else if (pokemon[current].distance <= 90) document.getElementById("f" + nearbyPokemon).src = "images/2feet.png";
+							else document.getElementById("f" + nearbyPokemon).src = "images/3feet.png";
+							mintoexpire = (pokemon[current].expiration_time - seconds) / 60
+							document.getElementById("p" + nearbyPokemon).innerHTML = mintoexpire.toString().match(/.*\..{0,2}|.*/)[0] + "m";
+								
+							nearbyPokemon++;
+						}
+					} else break;
+				}
+				
+				document.getElementById("status").innerHTML = nearbyPokemon + " Pokemon Found";
+			}
+			
+			document.getElementById("loading").style.visibility = "hidden";
+			timeout = setTimeout("scan();", 40000);	
+		});
+	}, function(error) { document.getElementById("status").innerHTML = "Location Error"; timeout = setTimeout("scan();", 2000);	}, { enableHighAccuracy: true, timeout: 60000, maximumAge: 10000 } );
+}
+
+scan();
 </script>
 </html>
